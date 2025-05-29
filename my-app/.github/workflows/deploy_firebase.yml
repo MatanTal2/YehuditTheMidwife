@@ -1,0 +1,84 @@
+name: Deploy to Firebase Hosting
+
+on:
+  push:
+    branches:
+      - main # Deploy only when pushes are made to main
+
+jobs:
+  build_and_deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    # This job should only run if the 'test' job in 'ci.yml' on the same commit succeeded.
+    # A simpler approach for now is to ensure 'main' is protected and requires CI to pass.
+    # For this MVP, we'll assume 'main' is updated after CI passes on 'dev' or a feature branch.
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Specify your Node.js version
+
+      - name: Cache Node.js modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js application
+        run: npm run build
+        # Note for user: If your NEXT_PUBLIC_FIREBASE_... variables are needed at build time
+        # (e.g., for static generation using these values), uncomment the 'env' section below
+        # and ensure these secrets are also set in your GitHub repository secrets.
+        # env:
+        #   NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+        #   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ${{ secrets.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN }}
+        #   NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
+        #   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
+        #   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+        #   NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}' # Required
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_YEHUDIT_THE_MIDWIFE }}' # User must create this secret
+          channelId: live # Deploy to live channel
+          projectId: '${{ secrets.FIREBASE_PROJECT_ID_YEHUDIT_THE_MIDWIFE }}' # User must create this secret
+        # env: # Environment variables for the deployment step itself, if needed by firebase-tools
+        #   FIREBASE_CLI_PREVIEWS: hostingchannels # Example, if using preview channels
+        #   FIREBASE_TOKEN: ${{ secrets.FIREBASE_CLI_TOKEN }} # Alternative to service account for some cases, but service account is preferred for CI/CD
+```
+
+**Important User Instructions (to be added to a markdown file later):**
+
+*   **GitHub Secrets Required for Deployment:**
+    1.  `FIREBASE_SERVICE_ACCOUNT_YEHUDIT_THE_MIDWIFE`:
+        *   **Content**: The full JSON content of a Firebase service account key.
+        *   **How to get**:
+            1.  Go to your Firebase Project -> Project Settings (gear icon) -> Service accounts.
+            2.  Select the "Node.js" option for code samples.
+            3.  Click "Generate new private key". A JSON file will be downloaded.
+            4.  Open this JSON file, copy its entire content.
+            5.  In your GitHub repository, go to Settings -> Secrets and variables -> Actions.
+            6.  Click "New repository secret". Name it `FIREBASE_SERVICE_ACCOUNT_YEHUDIT_THE_MIDWIFE` and paste the JSON content as the value.
+    2.  `FIREBASE_PROJECT_ID_YEHUDIT_THE_MIDWIFE`:
+        *   **Content**: Your Firebase Project ID.
+        *   **How to get**: Go to Firebase Project -> Project Settings (gear icon) -> General tab. Copy the "Project ID".
+        *   **In GitHub**: Create another repository secret named `FIREBASE_PROJECT_ID_YEHUDIT_THE_MIDWIFE` and paste your Project ID as the value.
+*   **Build-Time Environment Variables (Optional):**
+    *   The `env` block in the "Build Next.js application" step (for `NEXT_PUBLIC_FIREBASE_...` variables) is commented out.
+    *   Your `my-app/src/lib/firebase/firebaseConfig.ts` file reads these from `process.env`. For client-side rendering, these variables are typically needed at runtime, and your current setup should work if they are defined in your `.env.local` for local development and Firebase Hosting environment variables for deployment (see Firebase console -> Hosting -> Add custom domain -> Environment variables).
+    *   However, if your Next.js app performs static site generation (SSG) for pages that directly use these Firebase config values, or if server components need them during the build, they must be available at build time in the CI environment.
+    *   If needed:
+        1.  Uncomment the `env` section in the `deploy_firebase.yml` build step.
+        2.  Create corresponding secrets in GitHub for each `NEXT_PUBLIC_FIREBASE_...` variable (e.g., `NEXT_PUBLIC_FIREBASE_API_KEY`, `NEXT_PUBLIC_FIREBASE_PROJECT_ID`, etc.).
+        3.  The `NEXT_PUBLIC_FIREBASE_PROJECT_ID` secret would be the same value as `FIREBASE_PROJECT_ID_YEHUDIT_THE_MIDWIFE`.
