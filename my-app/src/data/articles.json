@@ -1,0 +1,42 @@
+[
+  {
+    "id": "first-trimester-essentials",
+    "title": "First Trimester Essentials",
+    "body": "The first trimester (weeks 1-12) is a critical period of development for your baby. Focus on a balanced diet rich in folic acid, get plenty of rest, and schedule your first prenatal visit. Morning sickness is common; try eating small, frequent meals to manage it.",
+    "weekRange": [1, 12],
+    "tags": ["first trimester", "nutrition", "symptoms"],
+    "createdAt": "2023-10-01T10:00:00Z"
+  },
+  {
+    "id": "understanding-second-trimester",
+    "title": "Understanding the Second Trimester",
+    "body": "Welcome to the second trimester (weeks 13-28)! Many women find this to be the most comfortable period of pregnancy. You might feel an energy boost, and morning sickness often subsides. It's a good time for prenatal exercise and planning for the baby's arrival. You'll likely feel your baby's first movements (quickening).",
+    "weekRange": [13, 28],
+    "tags": ["second trimester", "well-being", "fetal movement"],
+    "createdAt": "2023-10-15T11:00:00Z"
+  },
+  {
+    "id": "preparing-for-third-trimester",
+    "title": "Preparing for the Third Trimester",
+    "body": "The third trimester (weeks 29-40+) is the home stretch. Your baby continues to grow rapidly. You might experience more discomfort due to your size, such as backaches and shortness of breath. Attend childbirth classes, pack your hospital bag, and learn about the signs of labor.",
+    "weekRange": [29, 40],
+    "tags": ["third trimester", "birth preparation", "comfort"],
+    "createdAt": "2023-11-01T12:00:00Z"
+  },
+  {
+    "id": "early-pregnancy-nutrition",
+    "title": "Nutrition in Early Pregnancy",
+    "body": "Folic acid is crucial in the early weeks (even before conception) to prevent neural tube defects. Ensure you're also getting enough iron, calcium, and vitamin D. Avoid raw or undercooked meats, certain types of fish high in mercury, and unpasteurized dairy products.",
+    "weekRange": [1, 8],
+    "tags": ["nutrition", "first trimester", "supplements"],
+    "createdAt": "2023-09-20T09:00:00Z"
+  },
+  {
+    "id": "mid-pregnancy-ultrasound",
+    "title": "The Mid-Pregnancy Ultrasound",
+    "body": "Around weeks 18-22, you'll typically have a detailed anatomy scan. This ultrasound checks your baby's physical development, confirms the due date, and can often reveal the baby's sex if you choose to find out. It's an exciting milestone!",
+    "weekRange": [18, 22],
+    "tags": ["second trimester", "ultrasound", "fetal development"],
+    "createdAt": "2023-10-25T14:00:00Z"
+  }
+]
