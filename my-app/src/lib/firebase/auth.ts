@@ -110,8 +110,6 @@ export const initializeAuthStateListener = (): (() => void) => {
     unsubscribeAuthListener();
   }
 
-  setLoading(true); // Set loading true when listener starts
-
   unsubscribeAuthListener = firebaseOnAuthStateChanged(
     auth,
     async (user: FirebaseUser | null) => {
@@ -139,7 +137,7 @@ export const initializeAuthStateListener = (): (() => void) => {
           checklistItems: [],
         });
       }
-      setLoading(false); // Auth loading finished
+      // setLoading(false); // Auth loading finished -- This line is removed as setUser handles it.
     },
     (error) => {
       console.error('Error in auth state listener:', error);
