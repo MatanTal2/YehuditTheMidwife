@@ -1,17 +1,21 @@
 'use client';
 
 import { useUserStore } from '@/store/useUserStore';
+import { shallow } from 'zustand/shallow'; // Import shallow
 import { signOutUser } from '@/lib/firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // Using next/navigation for App Router
 
 const AuthStatus = () => {
-  const { email, isLoggedIn, isLoading, error } = useUserStore((state) => ({
-    email: state.email,
-    isLoggedIn: state.isLoggedIn,
-    isLoading: state.isLoading, // To disable button while auth operations are in progress
-    error: state.error,
-  }));
+  const { email, isLoggedIn, isLoading, error } = useUserStore(
+    (state) => ({
+      email: state.email,
+      isLoggedIn: state.isLoggedIn,
+      isLoading: state.isLoading,
+      error: state.error,
+    }),
+    shallow // Use shallow equality
+  );
   const router = useRouter();
 
   const handleLogout = async () => {
