@@ -58,6 +58,13 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ article }) => {
          </a>
        </Link>
      </div>
+      <div className="mt-8">
+       <Link href="/articles" legacyBehavior>
+         <a className="text-indigo-600 hover:text-indigo-800 hover:underline">
+           &larr; Back to All Articles
+         </a>
+       </Link>
+     </div>
     </article>
   );
 };
