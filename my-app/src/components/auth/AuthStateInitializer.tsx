@@ -13,7 +13,7 @@ const AuthStateInitializer = () => {
   const listenerInitialized = useRef(false);
   // Accessing Zustand store to potentially trigger re-renders if needed,
   // though its primary role here is to ensure the listener is set up.
-  const { setLoading } = useUserStore.getState();
+  // const { setLoading } = useUserStore.getState(); // setLoading from effect dependency removed
 
 
   useEffect(() => {
@@ -21,8 +21,10 @@ const AuthStateInitializer = () => {
 
     // Ensure the listener is only initialized once.
     // The `useRef` hook helps maintain this state across re-renders without causing re-initialization.
+    // The store initializes isLoading to true, so the setLoading(true) call here might be redundant
+    // or could be handled directly by the initializeAuthStateListener if needed.
     if (!listenerInitialized.current) {
-      setLoading(true); // Set initial loading state
+      // useUserStore.getState().setLoading(true); // Ensure store reflects loading state before listener resolves
       unsubscribe = initializeAuthStateListener();
       listenerInitialized.current = true;
       console.log('AuthStateInitializer: Firebase auth listener started.');
@@ -36,11 +38,12 @@ const AuthStateInitializer = () => {
         unsubscribe();
       }
       // Optionally, you could also call the more explicit unsubscribeFromAuth()
-      // if it handles global state or other refs that need resetting.
+      // if it handles global state or other refs that need resetting,
+      // though the returned unsubscribe from initializeAuthStateListener should be sufficient.
       // unsubscribeFromAuth(); 
       // listenerInitialized.current = false; // Reset if you want it to re-init if component remounts after unmount
     };
-  }, [setLoading]); // Effect dependencies
+  }, []); // Empty dependency array ensures this effect runs only once on mount and cleans up on unmount
 
   return null; // This component does not render anything
 };
