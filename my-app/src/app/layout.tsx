@@ -23,20 +23,18 @@ export default function RootLayout({
         <AuthStateInitializer /> {/* Initialize auth state listener globally */}
         <header className="bg-white shadow-md">
           <nav className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <Link href="/" legacyBehavior>
-              <a className="text-2xl font-bold text-indigo-600 hover:text-indigo-700">
-                MyApp
-              </a>
+            <Link href="/" className="text-2xl font-bold text-indigo-600 hover:text-indigo-700">
+              MyApp
             </Link>
             <div className="flex items-center space-x-4">
-              <Link href="/articles" legacyBehavior>
-                <a className="text-sm font-medium text-gray-700 hover:text-indigo-600">All Articles</a>
+              <Link href="/articles" className="text-sm font-medium text-gray-700 hover:text-indigo-600">
+                All Articles
               </Link>
-              <Link href="/pregnancy-by-week/1" legacyBehavior>
-                <a className="text-sm font-medium text-gray-700 hover:text-indigo-600">Pregnancy by Week</a>
+              <Link href="/pregnancy-by-week/1" className="text-sm font-medium text-gray-700 hover:text-indigo-600">
+                Pregnancy by Week
               </Link>
               {/* UserProfileForm link can be added here or kept on main page if preferred */}
-              {/* <Link href="/user-profile" legacyBehavior><a className="text-sm font-medium text-gray-700 hover:text-indigo-600">User Profile</a></Link> */}
+              {/* <Link href="/user-profile" className="text-sm font-medium text-gray-700 hover:text-indigo-600"> User Profile</Link> */}
               <AuthStatus /> {/* Display auth status and login/logout/register buttons */}
             </div>
           </nav>
