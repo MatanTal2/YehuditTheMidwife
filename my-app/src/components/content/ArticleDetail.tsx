@@ -29,7 +29,6 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ article }) => {
           <p>Published on: {formattedDate}</p>
         </div>
       </header>
-      
       <div className="text-gray-700 leading-relaxed">
         {/* Using dangerouslySetInnerHTML for demonstration if body contains HTML.
             If body is plain text, just {article.body} is fine and safer.
@@ -38,7 +37,6 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ article }) => {
           <p key={index} className="mb-4">{paragraph}</p>
         ))}
       </div>
-
       {article.tags && article.tags.length > 0 && (
         <footer className="mt-10 pt-6 border-t">
           <h3 className="text-lg font-semibold text-gray-800 mb-2">Related Topics:</h3>
@@ -53,13 +51,13 @@ const ArticleDetail: React.FC<ArticleDetailProps> = ({ article }) => {
           </div>
         </footer>
       )}
-       <div className="mt-8">
-        <Link href="/articles" legacyBehavior>
-          <a className="text-indigo-600 hover:text-indigo-800 hover:underline">
-            &larr; Back to All Articles
-          </a>
-        </Link>
-      </div>
+      <div className="mt-8">
+       <Link href="/articles" legacyBehavior>
+         <a className="text-indigo-600 hover:text-indigo-800 hover:underline">
+           &larr; Back to All Articles
+         </a>
+       </Link>
+     </div>
     </article>
   );
 };
