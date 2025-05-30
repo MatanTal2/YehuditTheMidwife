@@ -43,7 +43,7 @@ export default function RootLayout({
           {children}
         </main>
         <footer className="py-6 text-center text-sm text-gray-500 border-t border-gray-200 mt-auto">
-          © {new Date().getFullYear()} Yehudit's App. All rights reserved.
+          © {new Date().getFullYear()} Yehudit&#39;s App. All rights reserved.
         </footer>
       </body>
     </html>
