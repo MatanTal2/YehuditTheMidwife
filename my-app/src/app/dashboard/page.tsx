@@ -180,6 +180,9 @@ export default function DashboardPage() {
              (<div className="text-center py-10">
                <p className="text-gray-600">Loading your personalized information...</p>
              </div>)
+             (<div className="text-center py-10">
+               <p className="text-gray-600">Loading your personalized information...</p>
+             </div>)
         )}
 
         <section id="due-date-section" className="bg-white p-6 rounded-lg shadow-lg">
