@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react'; // Added import
 import { useUserStore } from '@/store/useUserStore';
 import { shallow } from 'zustand/shallow'; // Import shallow
 import { signOutUser } from '@/lib/firebase/auth';
@@ -7,6 +8,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // Using next/navigation for App Router
 
 const AuthStatus = () => {
+  const [isClientMounted, setIsClientMounted] = useState(false); // Added state
+
+  useEffect(() => { // Added effect
+    setIsClientMounted(true);
+  }, []);
+
   const { email, isLoggedIn, isLoading, error } = useUserStore(
     (state) => ({
       email: state.email,
@@ -25,7 +32,8 @@ const AuthStatus = () => {
     router.push('/'); 
   };
 
-  if (isLoading && !isLoggedIn) { // Show loading only if not yet logged in, or during logout process
+  // Modified if condition
+  if (!isClientMounted || (isLoading && !isLoggedIn)) { // Show loading only if not yet logged in, or during logout process, or not yet mounted
     return <div className="text-sm text-gray-500">Loading user status...</div>;
   }
 
