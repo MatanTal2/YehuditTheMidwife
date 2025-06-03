@@ -1,3 +1,4 @@
+'use client';
 import {create} from 'zustand';
 import type { Timestamp } from 'firebase/firestore'; // Import Timestamp
 import type { ChecklistItem, UserData } from '@/lib/firebase/firestore'; // Import ChecklistItem
@@ -61,9 +62,9 @@ export const useUserStore = create<UserProfileState>((set, get) => ({
   isLoggedIn: false,
   isLoading: true, // Start with loading true until auth state is confirmed
   error: null,
-  
+
   // User profile state (general, e.g. from a separate 'profiles' collection or auth.displayName)
-  name: '', 
+  name: '',
 
   // User-specific data from 'users/{uid}' collection
   dueDate: null,
@@ -73,17 +74,17 @@ export const useUserStore = create<UserProfileState>((set, get) => ({
   userDataError: null,
 
   // --- AUTH ACTIONS ---
-  setUser: (uid, email) => set({ 
-    uid, 
-    email, 
-    isLoggedIn: !!uid, 
+  setUser: (uid, email) => set({
+    uid,
+    email,
+    isLoggedIn: !!uid,
     isLoading: false, // Auth loading finished
-    error: null 
+    error: null
   }),
   setLoading: (loading) => set({ isLoading: loading }),
   setError: (error) => set({ error, isLoading: false }),
   clearError: () => set({ error: null }),
-  
+
   // --- PROFILE ACTIONS (example) ---
   setName: (name) => set({ name }),
 
@@ -91,7 +92,7 @@ export const useUserStore = create<UserProfileState>((set, get) => ({
   setUserData: (data) => {
     const update: Partial<UserProfileState> = {
       favoriteArticleIds: data.favoriteArticleIds || get().favoriteArticleIds,
-      checklistItems: data.checklistItems 
+      checklistItems: data.checklistItems
         ? data.checklistItems.map(item => ({ // Ensure timestamps are converted if they are Timestamps
             ...item,
             createdAt: item.createdAt instanceof Timestamp ? item.createdAt.toDate() : item.createdAt
@@ -114,18 +115,18 @@ export const useUserStore = create<UserProfileState>((set, get) => ({
   clearUserDataError: () => set({ userDataError: null }),
 
   updateDueDate: (newDueDate) => set({ dueDate: newDueDate }),
-  
+
   addFavoriteId: (articleId) => set((state) => ({
-    favoriteArticleIds: state.favoriteArticleIds.includes(articleId) 
-      ? state.favoriteArticleIds 
+    favoriteArticleIds: state.favoriteArticleIds.includes(articleId)
+      ? state.favoriteArticleIds
       : [...state.favoriteArticleIds, articleId]
   })),
-  
+
   removeFavoriteId: (articleId) => set((state) => ({
     favoriteArticleIds: state.favoriteArticleIds.filter(id => id !== articleId)
   })),
-  
-  setChecklist: (items) => set({ 
+
+  setChecklist: (items) => set({
     checklistItems: items.map(item => ({
       ...item,
       // Ensure createdAt is a Date object if it's coming from Firestore as Timestamp
@@ -140,7 +141,7 @@ export const useUserStore = create<UserProfileState>((set, get) => ({
       createdAt: item.createdAt instanceof Timestamp ? item.createdAt.toDate() : (item.createdAt || new Date())
     };
     set((state) => ({
-      checklistItems: [...state.checklistItems, newItem].sort((a, b) => 
+      checklistItems: [...state.checklistItems, newItem].sort((a, b) =>
         (a.createdAt as Date).getTime() - (b.createdAt as Date).getTime()
       )
     }));
@@ -155,7 +156,7 @@ export const useUserStore = create<UserProfileState>((set, get) => ({
       checklistItems: state.checklistItems.map(item => item.id === newItem.id ? newItem : item)
     }));
   },
-  
+
   removeChecklistItem: (itemId) => set((state) => ({
     checklistItems: state.checklistItems.filter(item => item.id !== itemId)
   })),
@@ -166,7 +167,7 @@ export const useUserStore = create<UserProfileState>((set, get) => ({
 // This depends on your app structure. If AuthStateInitializer component is used, this might be redundant.
 // if (typeof window !== 'undefined') { // Ensure it runs only on client-side
 //   useUserStore.getState().setLoading(true); // Set initial loading state
-//   initializeAuthStateListener(); 
+//   initializeAuthStateListener();
 //   console.log("Zustand store: Auth listener initialization requested.");
 // }
 
