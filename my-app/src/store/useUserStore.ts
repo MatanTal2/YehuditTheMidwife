@@ -9,15 +9,6 @@ const timestampToDate = (timestamp: Timestamp | undefined | null): Date | null =
   return timestamp.toDate();
 };
 
-// Helper to convert Date objects to Firestore Timestamps or null
-// Not strictly needed in the store if we always convert before sending to Firestore,
-// but good to be aware of if we were to store Timestamps directly in store.
-// const dateToTimestamp = (date: Date | null): Timestamp | null => {
-//   if (!date) return null;
-//   return Timestamp.fromDate(date);
-// };
-
-
 interface UserProfileState {
   uid: string | null;
   email: string | null; // from auth
@@ -55,124 +46,124 @@ interface UserProfileState {
   removeChecklistItem: (itemId: string) => void;
 }
 
-export const useUserStore = create<UserProfileState>((set, get) => ({
-  // Auth state
+const initialState: Omit<UserProfileState, keyof ReturnType<typeof createActions>> = {
   uid: null,
   email: null,
   isLoggedIn: false,
   isLoading: true, // Start with loading true until auth state is confirmed
   error: null,
-
-  // User profile state (general, e.g. from a separate 'profiles' collection or auth.displayName)
   name: '',
-
-  // User-specific data from 'users/{uid}' collection
   dueDate: null,
   favoriteArticleIds: [],
   checklistItems: [],
-  userDataLoading: false, // Initially false, true when fetching UserData
+  userDataLoading: false,
   userDataError: null,
+};
 
-  // --- AUTH ACTIONS ---
-  setUser: (uid, email) => set({
+// Separating actions for clarity, especially with functional updates
+const createActions = (set: (fn: (state: UserProfileState) => UserProfileState) => void, get: () => UserProfileState) => ({
+  setUser: (uid: string | null, email: string | null) => set((state) => ({
+    ...state,
     uid,
     email,
     isLoggedIn: !!uid,
-    isLoading: false, // Auth loading finished
+    isLoading: false,
     error: null
-  }),
-  setLoading: (loading) => set({ isLoading: loading }),
-  setError: (error) => set({ error, isLoading: false }),
-  clearError: () => set({ error: null }),
+  })),
+  setLoading: (loading: boolean) => set((state) => ({ ...state, isLoading: loading })),
+  setError: (error: string | null) => set((state) => ({ ...state, error, isLoading: false })),
+  clearError: () => set((state) => ({ ...state, error: null })),
 
-  // --- PROFILE ACTIONS (example) ---
-  setName: (name) => set({ name }),
+  setName: (name: string) => set((state) => ({ ...state, name })),
 
-  // --- USER DATA ACTIONS (for data from 'users/{uid}') ---
-  setUserData: (data) => {
+  setUserData: (data: Partial<UserData>) => set((state) => {
+    const currentFavorites = state.favoriteArticleIds;
+    const currentChecklist = state.checklistItems;
+    const currentDueDate = state.dueDate;
+
     const update: Partial<UserProfileState> = {
-      favoriteArticleIds: data.favoriteArticleIds || get().favoriteArticleIds,
+      ...state, // Start with current state
+      favoriteArticleIds: data.favoriteArticleIds || currentFavorites,
       checklistItems: data.checklistItems
-        ? data.checklistItems.map(item => ({ // Ensure timestamps are converted if they are Timestamps
+        ? data.checklistItems.map(item => ({
             ...item,
             createdAt: item.createdAt instanceof Timestamp ? item.createdAt.toDate() : item.createdAt
           }))
-        : get().checklistItems,
-      dueDate: data.dueDate ? timestampToDate(data.dueDate) : get().dueDate, // Convert Timestamp to Date
+        : currentChecklist,
+      dueDate: data.dueDate ? timestampToDate(data.dueDate) : currentDueDate,
       userDataLoading: false,
       userDataError: null,
     };
-    if (data.email && !get().email) { // Populate email if not set by auth yet (e.g. from Firestore doc)
+    if (data.email && !state.email) {
         update.email = data.email;
     }
-    if (data.uid && !get().uid) { // Populate uid if not set by auth yet
+    if (data.uid && !state.uid) {
         update.uid = data.uid;
     }
-    set(update);
-  },
-  setUserDataLoading: (loading) => set({ userDataLoading: loading }),
-  setUserDataError: (error) => set({ userDataError: error, userDataLoading: false }),
-  clearUserDataError: () => set({ userDataError: null }),
+    return update; // Return the new state object
+  }),
+  setUserDataLoading: (loading: boolean) => set((state) => ({ ...state, userDataLoading: loading })),
+  setUserDataError: (error: string | null) => set((state) => ({ ...state, userDataError: error, userDataLoading: false })),
+  clearUserDataError: () => set((state) => ({ ...state, userDataError: null })),
 
-  updateDueDate: (newDueDate) => set({ dueDate: newDueDate }),
+  updateDueDate: (newDueDate: Date | null) => set((state) => ({ ...state, dueDate: newDueDate })),
 
-  addFavoriteId: (articleId) => set((state) => ({
+  addFavoriteId: (articleId: string) => set((state) => ({
+    ...state,
     favoriteArticleIds: state.favoriteArticleIds.includes(articleId)
       ? state.favoriteArticleIds
       : [...state.favoriteArticleIds, articleId]
   })),
 
-  removeFavoriteId: (articleId) => set((state) => ({
+  removeFavoriteId: (articleId: string) => set((state) => ({
+    ...state,
     favoriteArticleIds: state.favoriteArticleIds.filter(id => id !== articleId)
   })),
 
-  setChecklist: (items) => set({
+  setChecklist: (items: ChecklistItem[]) => set((state) => ({
+    ...state,
     checklistItems: items.map(item => ({
       ...item,
-      // Ensure createdAt is a Date object if it's coming from Firestore as Timestamp
       createdAt: item.createdAt instanceof Timestamp ? item.createdAt.toDate() : item.createdAt
     }))
-  }),
+  })),
 
-  addChecklistItem: (item) => {
+  addChecklistItem: (item: ChecklistItem) => set((state) => {
     const newItem = {
       ...item,
-      // Ensure createdAt is a Date object
       createdAt: item.createdAt instanceof Timestamp ? item.createdAt.toDate() : (item.createdAt || new Date())
     };
-    set((state) => ({
+    return {
+      ...state,
       checklistItems: [...state.checklistItems, newItem].sort((a, b) =>
         (a.createdAt as Date).getTime() - (b.createdAt as Date).getTime()
       )
-    }));
-  },
+    };
+  }),
 
-  updateChecklistItem: (updatedItem) => {
+  updateChecklistItem: (updatedItem: ChecklistItem) => set((state) => {
      const newItem = {
       ...updatedItem,
       createdAt: updatedItem.createdAt instanceof Timestamp ? updatedItem.createdAt.toDate() : updatedItem.createdAt
     };
-    set((state) => ({
+    return {
+      ...state,
       checklistItems: state.checklistItems.map(item => item.id === newItem.id ? newItem : item)
-    }));
-  },
+    };
+  }),
 
-  removeChecklistItem: (itemId) => set((state) => ({
+  removeChecklistItem: (itemId: string) => set((state) => ({
+    ...state,
     checklistItems: state.checklistItems.filter(item => item.id !== itemId)
   })),
+});
 
+export const useUserStore = create<UserProfileState>((set, get) => ({
+  ...initialState,
+  ...createActions(set as any, get as any), // Casting set and get as 'any' to simplify type matching for this refactor
 }));
 
-// Initialize auth listener when store is created (if not already handled elsewhere)
-// This depends on your app structure. If AuthStateInitializer component is used, this might be redundant.
-// if (typeof window !== 'undefined') { // Ensure it runs only on client-side
-//   useUserStore.getState().setLoading(true); // Set initial loading state
-//   initializeAuthStateListener();
-//   console.log("Zustand store: Auth listener initialization requested.");
-// }
-
-// Modify the auth.ts to ensure createUserDocument is called
-// when onAuthStateChanged detects a new user for the first time.
-// This implies that auth.ts would need to import and use createUserDocument from firestore.ts
-// and also potentially call getUserData to populate the store initially.
-// This is a structural consideration for how data flows from Firestore to Zustand upon login/registration.
+// Initialize store only on client side
+if (typeof window !== 'undefined') {
+  useUserStore.setState(initialState);
+}
