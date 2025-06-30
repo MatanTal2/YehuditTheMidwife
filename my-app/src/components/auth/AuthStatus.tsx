@@ -1,31 +1,44 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useUserStore } from '@/store/useUserStore';
-import { shallow } from 'zustand/shallow'; // Import shallow
+// No longer importing shallow
 import { signOutUser } from '@/lib/firebase/auth';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // Using next/navigation for App Router
+import { useRouter } from 'next/navigation';
 
 const AuthStatus = () => {
-  const { email, isLoggedIn, isLoading, error } = useUserStore(
-    (state) => ({
-      email: state.email,
-      isLoggedIn: state.isLoggedIn,
-      isLoading: state.isLoading,
-      error: state.error,
-    }),
-    shallow // Use shallow equality
-  );
+  const [isClientMounted, setIsClientMounted] = useState(false);
+
+  useEffect(() => {
+    setIsClientMounted(true);
+  }, []);
+
+  // Individual selectors for store state
+  const email = useUserStore(state => state.email);
+  const isLoggedIn = useUserStore(state => state.isLoggedIn);
+  const isLoading = useUserStore(state => state.isLoading);
+  const error = useUserStore(state => state.error);
+
   const router = useRouter();
 
   const handleLogout = async () => {
-    await signOutUser();
-    // The onAuthStateChanged listener will update the store and isLoggedIn state.
-    // Redirect to home or login page after logout
-    router.push('/'); 
+    try {
+      await signOutUser();
+      router.push('/');
+    } catch (err) {
+      console.error("Logout error:", err);
+      // Optional: useUserStore.getState().setError("Logout failed. Please try again.");
+    }
   };
 
-  if (isLoading && !isLoggedIn) { // Show loading only if not yet logged in, or during logout process
+  // First check: if not client mounted, return null (or placeholder)
+  if (!isClientMounted) {
+    return null;
+  }
+
+  // Second check: Loading state (only after client mount is confirmed)
+  if (isLoading && !isLoggedIn) {
     return <div className="text-sm text-gray-500">Loading user status...</div>;
   }
 
@@ -47,7 +60,7 @@ const AuthStatus = () => {
   }
 
   return (
-    <div className="flex items-center space-x-4 relative"> {/* Added relative for error positioning */}
+    <div className="flex items-center space-x-4 relative">
       {email && <p className="text-sm text-gray-700 hidden sm:block">Welcome, <span className="font-medium">{email.split('@')[0]}</span>!</p>}
       <Link href="/dashboard" legacyBehavior>
         <a className="px-3 py-1.5 text-sm font-medium text-indigo-700 hover:text-indigo-600 transition-colors rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -56,14 +69,13 @@ const AuthStatus = () => {
       </Link>
       <button
         onClick={handleLogout}
-        disabled={isLoading}
+        disabled={isLoading} // isLoading here refers to the Zustand store's isLoading
         className="px-3 py-1.5 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:bg-red-300 transition-colors"
       >
         {isLoading ? 'Logging out...' : 'Logout'}
       </button>
       {error && (
         <p className="text-xs text-red-500 mt-1 absolute -bottom-5 right-0 whitespace-nowrap">
-          {/* Error: {error} - This can be too long. Shorten or make it a tooltip. */}
           Auth Error
         </p>
       )}

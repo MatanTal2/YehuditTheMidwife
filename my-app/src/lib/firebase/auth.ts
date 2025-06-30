@@ -28,7 +28,7 @@ export const signUpWithEmailPassword = async (email: string, password: string): 
     console.error('Error signing up:', error);
     setError(error.message || 'Failed to sign up. Please try again.');
     // Rethrow the error if you want to handle it further in the component
-    // throw error; 
+    // throw error;
   } finally {
     // setLoading(false); // setLoading is handled by setUser or setError
   }
@@ -127,7 +127,7 @@ export const initializeAuthStateListener = (): (() => void) => {
           useUserStore.getState().setUserData(userData);
         }
         // Set user in store after ensuring Firestore doc and data are handled
-        setUser(user.uid, user.email); 
+        setUser(user.uid, user.email);
       } else {
         console.log('Auth state changed: User is logged out');
         setUser(null, null); // Clears user data, including from Firestore
@@ -145,7 +145,7 @@ export const initializeAuthStateListener = (): (() => void) => {
       setLoading(false);
     }
   );
-  
+
   console.log("Firebase auth state listener initialized.");
   return unsubscribeAuthListener;
 };
